@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queryly - Lightweight CLI Database Manager for Developers</title>
+    <meta name="description" content="Fast, cross-platform CLI tool for managing SQLite and PostgreSQL databases. Browse data, run queries, and export with ease.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1.25rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        nav a:hover {
+            color: #1a1a1a;
+        }
+
+        .github-link {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .github-link:hover {
+            border-color: #1a1a1a;
+            background: #f9fafb;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 5rem 0 4rem;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            color: #374151;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .hero h1 {
+            font-size: 3.75rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+        }
+
+        .hero-highlight {
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 3rem;
+            color: #6b7280;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: #1a1a1a;
+            color: #ffffff;
+            border: 2px solid #1a1a1a;
+        }
+
+        .btn-primary:hover {
+            background: #000000;
+            border-color: #000000;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #1a1a1a;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            border-color: #1a1a1a;
+        }
+
+        .install-note {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-top: 1rem;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2rem 0;
+            margin: 3rem 0;
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        /* Terminal Demo */
+        .terminal-demo {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 4rem auto 0;
+            max-width: 900px;
+            text-align: left;
+        }
+
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+
+        .terminal-title {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .terminal-content {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Courier New', monospace;
+            color: #374151;
+            font-size: 0.875rem;
+            line-height: 1.8;
+        }
+
+        .terminal-prompt {
+            color: #6b7280;
+            user-select: none;
+        }
+
+        .terminal-command {
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .terminal-output {
+            color: #6b7280;
+            margin: 0.25rem 0;
+        }
+
+        .terminal-success {
+            color: #10b981;
+        }
+
+        /* Problem Solution Section */
+        .problem-solution {
+            padding: 6rem 0;
+            background: #ffffff;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .problem-box, .solution-box {
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .problem-box {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .solution-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        .box-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+
+        .problem-box .box-title {
+            color: #dc2626;
+        }
+
+        .solution-box .box-title {
+            color: #16a34a;
+        }
+
+        .box-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .box-content ul {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .box-content li {
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            position: relative;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .problem-box li:before {
+            content: "✗";
+            position: absolute;
+            left: 0;
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .solution-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+            background: #f9fafb;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.125rem;
+            color: #6b7280;
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: #1a1a1a;
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.75rem;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* Use Cases */
+        .use-cases {
+            padding: 6rem 0;
+            background: #ffffff;
+        }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .use-case {
+            padding: 2rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .use-case-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .use-case-icon {
+            font-size: 2rem;
+        }
+
+        .use-case h3 {
+            font-size: 1.25rem;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .use-case p {
+            color: #6b7280;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .use-case-example {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.875rem;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Database Support */
+        .databases {
+            padding: 6rem 0;
+            background: #f9fafb;
+        }
+
+        .db-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .db-card {
+            background: #ffffff;
+            padding: 2rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .db-card:hover {
+            border-color: #1a1a1a;
+        }
+
+        .db-card.coming-soon {
+            opacity: 0.5;
+        }
+
+        .db-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .db-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+
+        .db-status {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .db-status.available {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        /* Comparison Table */
+        .comparison {
+            padding: 6rem 0;
+            background: #ffffff;
+        }
+
+        .comparison-table {
+            max-width: 900px;
+            margin: 3rem auto 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th {
+            background: #f9fafb;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #1a1a1a;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #4b5563;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .check {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .cross {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        /* Commands Section */
+        .commands {
+            padding: 6rem 0;
+            background: #f9fafb;
+        }
+
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 3rem auto 0;
+        }
+
+        .command-item {
+            background: #ffffff;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .command-item:hover {
+            border-color: #1a1a1a;
+        }
+
+        .command-item code {
+            background: #f9fafb;
+            color: #1a1a1a;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .command-item p {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Installation Section */
+        .installation {
+            padding: 6rem 0;
+            background: #ffffff;
+        }
+
+        .install-steps {
+            max-width: 800px;
+            margin: 3rem auto 0;
+        }
+
+        .install-step {
+            margin-bottom: 3rem;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #1a1a1a;
+            color: #ffffff;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .install-step h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #1a1a1a;
+        }
+
+        .install-step p {
+            color: #6b7280;
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .code-block {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 1.25rem;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.875rem;
+            color: #374151;
+            overflow-x: auto;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 6rem 0;
+            background: #1a1a1a;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .cta-section p {
+            font-size: 1.125rem;
+            margin-bottom: 2.5rem;
+            color: #d1d5db;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+        }
+
+        .cta-section .btn-primary {
+            background: #ffffff;
+            color: #1a1a1a;
+            border-color: #ffffff;
+        }
+
+        .cta-section .btn-primary:hover {
+            background: #f9fafb;
+        }
+
+        .cta-section .btn-secondary {
+            background: transparent;
+            color: #ffffff;
+            border-color: #4b5563;
+        }
+
+        .cta-section .btn-secondary:hover {
+            border-color: #ffffff;
+        }
+
+        /* Footer */
+        footer {
+            background: #ffffff;
+            color: #6b7280;
+            padding: 4rem 0 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand h3 {
+            font-size: 1.25rem;
+            color: #1a1a1a;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .footer-brand p {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: #6b7280;
+        }
+
+        .footer-section h4 {
+            font-size: 0.875rem;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .footer-section a:hover {
+            color: #1a1a1a;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .db-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .install-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+                letter-spacing: -1px;
+            }
+
+            .hero p {
+                font-size: 1.125rem;
+            }
+
+            nav ul {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                max-width: 100%;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .two-col {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .use-case-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .db-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .command-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .comparison-table {
+                overflow-x: auto;
+            }
+
+            .install-options {
+                grid-template-columns: 1fr;
+            }
+
+            .platform-section {
+                padding: 1.5rem;
+            }
+
+            .install-step {
+                padding-left: 0;
+            }
+
+            .step-number {
+                position: relative;
+                margin-bottom: 1rem;
+            }
+
+            .test-command {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">Queryly</div>
+            <ul>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#use-cases">Use Cases</a></li>
+                <li><a href="#install">Install</a></li>
+                <li><a href="https://github.com/Ayine-nongre/queryly" class="github-link">GitHub →</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">🚀 Open Source • Cross-Platform • Lightweight</div>
+            <h1>Manage databases <span class="hero-highlight">without the bloat</span></h1>
+            <p>A fast, developer-friendly CLI tool that makes working with local databases simple. Browse schemas, query data, and export results—all from your terminal.</p>
+            <div class="cta-buttons">
+                <a href="#install" class="btn btn-primary">Get Started →</a>
+                <a href="https://github.com/Ayine-nongre/queryly/blob/main/README.md" class="btn btn-secondary">Quick Start Guide</a>
+            </div>
+            <div class="install-note">Works on Windows, macOS, and Linux • Requires .NET 8+</div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-value">&lt;5MB</span>
+                    <span class="stat-label">Download Size</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">&lt;50ms</span>
+                    <span class="stat-label">Startup Time</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">2</span>
+                    <span class="stat-label">Databases Supported</span>
+                </div>
+            </div>
+
+            <!-- Terminal Demo -->
+            <div class="terminal-demo">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <div class="terminal-btn"></div>
+                        <div class="terminal-btn"></div>
+                        <div class="terminal-btn"></div>
+                    </div>
+                    <div class="terminal-title">Terminal</div>
+                    <div style="width: 60px;"></div>
+                </div>
+                <div class="terminal-content">
+                    <div><span class="terminal-prompt">$</span> <span class="terminal-command">queryly connect add</span></div>
+                    <div class="terminal-output">Connection name: DevDB</div>
+                    <div class="terminal-output">Database type: SQLite</div>
+                    <div class="terminal-output">Connection string: Data Source=./dev.db</div>
+                    <div class="terminal-success">✓ Connection successful!</div>
+                    <div style="margin-top: 1rem;"><span class="terminal-prompt">$</span> <span class="terminal-command">queryly schema list DevDB</span></div>
+                    <div class="terminal-output">┌────────────┬────────┐</div>
+                    <div class="terminal-output">│ Table      │ Rows   │</div>
+                    <div class="terminal-output">├────────────┼────────┤</div>
+                    <div class="terminal-output">│ users      │ 1,234  │</div>
+                    <div class="terminal-output">│ orders     │ 5,678  │</div>
+                    <div class="terminal-output">│ products   │ 892    │</div>
+                    <div class="terminal-output">└────────────┴────────┘</div>
+                    <div style="margin-top: 1rem;"><span class="terminal-prompt">$</span> <span class="terminal-command">queryly data browse DevDB users</span></div>
+                    <div class="terminal-output"># Interactive data browser with pagination...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem/Solution Section -->
+    <section class="problem-solution">
+        <div class="container">
+            <div class="two-col">
+                <div class="problem-box">
+                    <div class="box-title">The Problem</div>
+                    <div class="box-content">
+                        <h3>Database tools are too heavy</h3>
+                        <ul>
+                            <li>DBeaver and HeidiSQL are bloated and slow to start</li>
+                            <li>Can't easily install SQL Server Management Studio on Linux</li>
+                            <li>Need to open GUI just to check a table</li>
+                            <li>Export features are buried in menus</li>
+                            <li>Can't script or automate database tasks easily</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="solution-box">
+                    <div class="box-title">The Solution</div>
+                    <div class="box-content">
+                        <h3>Queryly makes it simple</h3>
+                        <ul>
+                            <li>Instant startup, runs entirely in your terminal</li>
+                            <li>Works with SQLite and PostgreSQL out of the box</li>
+                            <li>One command to browse any table</li>
+                            <li>Export to CSV/JSON with a single line</li>
+                            <li>Perfect for scripts, CI/CD, and automation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Everything you need, nothing you don't</h2>
+            <p class="section-subtitle">Built specifically for developers who want efficiency over fancy interfaces</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Sub-second startup time. No loading screens, no splash pages. Just instant access to your databases.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Schema Explorer</h3>
+                    <p>View table structures, column types, primary keys, and indexes. Tree view for complete database overview.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Smart Data Browser</h3>
+                    <p>Navigate large tables with pagination. Filter, sort, and search without writing SQL.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3>Quick Export</h3>
+                    <p>Export tables to CSV or JSON instantly. Perfect for backups, data analysis, or migrations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Interactive Queries</h3>
+                    <p>Run SQL queries in an interactive mode with syntax highlighting and formatted results.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔌</div>
+                    <h3>Multi-Database</h3>
+                    <p>SQLite and PostgreSQL supported now. SQL Server and MySQL coming soon. One tool for all.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section id="use-cases" class="use-cases">
+        <div class="container">
+            <h2 class="section-title">Built for real developers</h2>
+            <p class="section-subtitle">See how Queryly fits into your daily workflow</p>
+            <div class="use-case-grid">
+                <div class="use-case">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">🛠️</div>
+                        <h3>Local Development</h3>
+                    </div>
+                    <p>Quickly inspect your local database while developing. No need to open a heavy GUI - just run a command and see your data.</p>
+                    <div class="use-case-example">$ queryly data browse myapp users</div>
+                </div>
+                <div class="use-case">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">🔄</div>
+                        <h3>CI/CD Pipelines</h3>
+                    </div>
+                    <p>Export test data, validate schema changes, or run queries in your automated workflows. Perfect for scripts.</p>
+                    <div class="use-case-example">$ queryly data export testdb orders csv</div>
+                </div>
+                <div class="use-case">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">🐛</div>
+                        <h3>Debugging Production Issues</h3>
+                    </div>
+                    <p>SSH into a server and quickly inspect the database. No GUI required, works over terminal connections.</p>
+                    <div class="use-case-example">$ queryly schema info prod users</div>
+                </div>
+                <div class="use-case">
+                    <div class="use-case-header">
+                        <div class="use-case-icon">📈</div>
+                        <h3>Data Analysis</h3>
+                    </div>
+                    <p>Export data for analysis in Excel, Python, or R. Get your data out quickly without complex ETL tools.</p>
+                    <div class="use-case-example">$ queryly data export analytics events json</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Database Support -->
+    <section id="databases" class="databases">
+        <div class="container">
+            <h2 class="section-title">Works with your databases</h2>
+            <p class="section-subtitle">Native support for popular databases, with more coming soon</p>
+            <div class="db-grid">
+                <div class="db-card">
+                    <div class="db-logo">🗄️</div>
+                    <div class="db-name">SQLite</div>
+                    <div class="db-status available">✓ Available</div>
+                </div>
+                <div class="db-card">
+                    <div class="db-logo">🐘</div>
+                    <div class="db-name">PostgreSQL</div>
+                    <div class="db-status available">✓ Available</div>
+                </div>
+                <div class="db-card coming-soon">
+                    <div class="db-logo">💾</div>
+                    <div class="db-name">SQL Server</div>
+                    <div class="db-status">Coming Soon</div>
+                </div>
+                <div class="db-card coming-soon">
+                    <div class="db-logo">🐬</div>
+                    <div class="db-name">MySQL</div>
+                    <div class="db-status">Coming Soon</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="comparison">
+        <div class="container">
+            <h2 class="section-title">How Queryly compares</h2>
+            <p class="section-subtitle">See why developers choose Queryly for local database management</p>
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Queryly</th>
+                            <th>DBeaver</th>
+                            <th>HeidiSQL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Startup Time</td>
+                            <td><span class="check">✓</span> &lt;50ms</td>
+                            <td>~5 seconds</td>
+                            <td>~3 seconds</td>
+                        </tr>
+                        <tr>
+                            <td>Memory Usage</td>
+                            <td><span class="check">✓</span> ~20MB</td>
+                            <td>~500MB</td>
+                            <td>~100MB</td>
+                        </tr>
+                        <tr>
+                            <td>Works via SSH</td>
+                            <td><span class="check">✓</span> Yes</td>
+                            <td><span class="cross">✗</span> No</td>
+                            <td><span class="cross">✗</span> No</td>
+                        </tr>
+                        <tr>
+                            <td>Scriptable</td>
+                            <td><span class="check">✓</span> Yes</td>
+                            <td>Limited</td>
+                            <td>Limited</td>
+                        </tr>
+                        <tr>
+                            <td>Cross-Platform</td>
+                            <td><span class="check">✓</span> All OS</td>
+                            <td><span class="check">✓</span> All OS</td>
+                            <td>Windows only</td>
+                        </tr>
+                        <tr>
+                            <td>Price</td>
+                            <td><span class="check">✓</span> Free</td>
+                            <td>Free/Paid</td>
+                            <td>Free</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Commands Section -->
+    <section id="commands" class="commands">
+        <div class="container">
+            <h2 class="section-title">Essential commands</h2>
+            <p class="section-subtitle">Everything you need in simple, memorable commands</p>
+            <div class="command-grid">
+                <div class="command-item">
+                    <code>queryly connect add</code>
+                    <p>Add a new database connection with interactive prompts</p>
+                </div>
+                <div class="command-item">
+                    <code>queryly connect list</code>
+                    <p>Show all saved connections with last used dates</p>
+                </div>
+                <div class="command-item">
+                    <code>queryly schema list &lt;conn&gt;</code>
+                    <p>List all tables with row counts and sizes</p>
+                </div>
+                <div class="command-item">
+                    <code>queryly schema info &lt;conn&gt; &lt;table&gt;</code>
+                    <p>View detailed table structure and column information</p>
+                </div>
+                <div class="command-item">
+                    <code>queryly data browse &lt;conn&gt; &lt;table&gt;</code>
+                    <p>Interactively browse table data with pagination</p>
+                </div>
+                <div class="command-item">
+                    <code>queryly data query &lt;conn&gt;</code>
+                    <p>Enter interactive SQL query mode with formatted results</p>
+                </div>
+                <div class="command-item">
+                    <code>queryly data export &lt;conn&gt; &lt;table&gt; csv</code>
+                    <p>Export table data to CSV or JSON format</p>
+                </div>
+                <div class="command-item">
+                    <code>queryly connect test &lt;name&gt;</code>
+                    <p>Test if a saved connection is working properly</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="install" class="installation">
+        <div class="container">
+            <h2 class="section-title">Choose your installation method</h2>
+            <p class="section-subtitle">Download pre-built packages or build from source</p>
+            
+            <!-- Download Options -->
+            <div class="install-options">
+                <div class="install-option">
+                    <div class="option-badge">Recommended</div>
+                    <h3>📦 Download Pre-built Package</h3>
+                    <p>Ready-to-use installation with scripts included. Perfect for non-developers.</p>
+                    <div class="download-buttons">
+                        <a href="https://github.com/Ayine-nongre/queryly/releases/download/v1.0.0-beta/queryly-windows.zip" class="download-btn">
+                            <span class="download-icon">💻</span>
+                            <span class="download-text">
+                                <strong>Windows</strong>
+                                <small>queryly-windows.zip</small>
+                            </span>
+                        </a>
+                        <a href="https://github.com/Ayine-nongre/queryly/releases/download/v1.0.0-beta/queryly-linux.tar.xz" class="download-btn">
+                            <span class="download-icon">🐧</span>
+                            <span class="download-text">
+                                <strong>Linux</strong>
+                                <small>queryly-linux.tar.gz</small>
+                            </span>
+                        </a>
+                        <a href="https://github.com/Ayine-nongre/queryly/releases/download/v1.0.0-beta/queryly-macos.tar.xz" class="download-btn">
+                            <span class="download-icon">🍎</span>
+                            <span class="download-text">
+                                <strong>macOS</strong>
+                                <small>queryly-macos.tar.gz</small>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="install-option">
+                    <h3>🔧 Build from Source</h3>
+                    <p>For developers who want to contribute or customize Queryly.</p>
+                    <a href="#build-source" class="link-btn">View build instructions →</a>
+                </div>
+            </div>
+
+            <!-- <div class="alternative-install">
+                <div class="alt-icon">🔧</div>
+                <div class="alt-content">
+                    <h4>Prefer to build from source?</h4>
+                    <p>Clone the repository and build with .NET 8 SDK</p>
+                </div>
+                <a href="#build-source" class="alt-link">
+                    <span>View instructions</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div> -->
+
+            <!-- Windows Installation -->
+            <div class="install-steps">
+                <div class="platform-section">
+                    <h3>💻 Windows Installation</h3>
+                    <div class="install-step">
+                        <div class="step-number">1</div>
+                        <h4>Download and Extract</h4>
+                        <p>Download <code>queryly-windows.zip</code> and extract it to your preferred location</p>
+                    </div>
+                    <div class="install-step">
+                        <div class="step-number">2</div>
+                        <h4>Run the Install Script</h4>
+                        <p>Open PowerShell as Administrator in the extracted folder and run:</p>
+                        <div class="code-block">.\install.ps1</div>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">This adds Queryly to your PATH so you can run it from anywhere</p>
+                    </div>
+                    <div class="install-step">
+                        <div class="step-number">3</div>
+                        <h4>Test with Sample Database</h4>
+                        <p>Run the test script to create a sample SQLite database:</p>
+                        <div class="code-block">.\create-test-db.ps1</div>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">Creates a test database with sample data to explore</p>
+                    </div>
+                    <div class="install-step">
+                        <div class="step-number">4</div>
+                        <h4>Start Using Queryly</h4>
+                        <div class="code-block">queryly connect add
+# Follow the prompts to connect to the test database # Connection string: Data Source=./sample-db.sqlite</div>
+                    </div>
+                    <div class="uninstall-note">
+                        <strong>To uninstall:</strong> Run <code>.\uninstall.ps1</code> in PowerShell as Administrator
+                    </div>
+                </div>
+
+                <!-- Linux/macOS Installation -->
+                <div class="platform-section">
+                    <h3>🐧 🍎 Linux / macOS Installation</h3>
+                    <div class="install-step">
+                        <div class="step-number">1</div>
+                        <h4>Download and Extract</h4>
+                        <p>Download the appropriate <code>.tar.gz</code> file and extract:</p>
+                        <div class="code-block"># For Linux
+tar -xzf queryly-linux.tar.gz
+cd queryly
+                        </br>
+# For macOS
+tar -xzf queryly-macos.tar.gz
+cd queryly</div>
+                    </div>
+                    <div class="install-step">
+                        <div class="step-number">2</div>
+                        <h4>Make Scripts Executable</h4>
+                        <p>Give execute permissions to the installation scripts:</p>
+                        <div class="code-block">chmod +x install.sh uninstall.sh create-test-db.sh</div>
+                    </div>
+                    <div class="install-step">
+                        <div class="step-number">3</div>
+                        <h4>Run the Install Script</h4>
+                        <p>Install Queryly system-wide:</p>
+                        <div class="code-block">sudo ./install.sh</div>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">This copies Queryly to /usr/local/bin and makes it available globally</p>
+                    </div>
+                    <div class="install-step">
+                        <div class="step-number">4</div>
+                        <h4>Test with Sample Database</h4>
+                        <p>Create a test database with sample data:</p>
+                        <div class="code-block">./create-test-db.sh</div>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">Generates test.db with users, orders, and products tables</p>
+                    </div>
+                    <div class="install-step">
+                        <div class="step-number">5</div>
+                        <h4>Start Using Queryly</h4>
+                        <div class="code-block">queryly connect add
+# Connection string: Data Source=./sample-db.sqlite</div>
+                    </div>
+                    <div class="uninstall-note">
+                        <strong>To uninstall:</strong> Run <code>sudo ./uninstall.sh</code>
+                    </div>
+                </div>
+
+                <!-- Build from Source -->
+                <div id="build-source" class="platform-section">
+                    <h3>🔧 Build from Source (Developers)</h3>
+                    <div class="install-step">
+                        <div class="step-number">1</div>
+                        <h4>Clone the Repository</h4>
+                        <div class="code-block">git clone https://github.com/Ayine-nongre/queryly.git
+cd queryly</div>
+                    </div>
+                    <div class="install-step">
+                        <div class="step-number">2</div>
+                        <h4>Build the Project</h4>
+                        <p>Requires .NET 8 SDK or later</p>
+                        <div class="code-block">dotnet build</div>
+                    </div>
+                    <div class="install-step">
+                        <div class="step-number">3</div>
+                        <h4>Run Queryly</h4>
+                        <div class="code-block">dotnet run --project src/Queryly.CLI/Queryly.CLI.csproj -- connect add</div>
+                    </div>
+                    <div class="install-step">
+                        <h4>Optional: Create an Alias</h4>
+                        <div class="code-block"># Add to ~/.bashrc or ~/.zshrc
+alias queryly='dotnet run --project /path/to/queryly/src/Queryly.CLI/Queryly.CLI.csproj --'</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Test Section -->
+            <div class="quick-test">
+                <h3>🚀 Quick Test After Installation</h3>
+                <p>Once installed, try these commands to verify everything works:</p>
+                <div class="test-commands">
+                    <div class="test-command">
+                        <code>queryly --help</code>
+                        <span>Show all available commands</span>
+                    </div>
+                    <div class="test-command">
+                        <code>queryly connect list</code>
+                        <span>List saved connections (should be empty initially)</span>
+                    </div>
+                    <div class="test-command">
+                        <code>queryly connect add</code>
+                        <span>Add your first database connection</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to simplify your workflow?</h2>
+            <p>Join developers who've ditched bloated database GUIs for a faster, cleaner approach. Open source and free forever.</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/Ayine-nongre/queryly" class="btn btn-primary">View on GitHub →</a>
+                <a href="https://github.com/Ayine-nongre/queryly/blob/main/README.md" class="btn btn-secondary">Read Quick Start</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>Queryly</h3>
+                    <p>A lightweight CLI database manager built by developers, for developers. Because wrestling with database GUIs shouldn't be part of your workflow.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#use-cases">Use Cases</a></li>
+                        <li><a href="#install">Installation</a></li>
+                        <li><a href="https://github.com/Ayine-nongre/queryly/releases">Releases</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="https://github.com/Ayine-nongre/queryly/blob/main/README.md">Documentation</a></li>
+                        <li><a href="https://github.com/Ayine-nongre/queryly/blob/main/README.md">Quick Start</a></li>
+                        <li><a href="https://github.com/Ayine-nongre/queryly/issues">Report Bug</a></li>
+                        <li><a href="https://github.com/yourusername/queryly/discussions">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <ul>
+                        <li><a href="https://github.com/Ayine-nongre/queryly">GitHub</a></li>
+                        <li><a href="https://linkedin.com/in/ayine-nongre">LinkedIn</a></li>
+                        <li><a href="https://twitter.com/eanatinbire">Twitter</a></li>
+                        <li><a href="mailto:eugeneatinbire@gmail.com">Email</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Queryly. Open source under MIT License. Built with ❤️ for developers.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

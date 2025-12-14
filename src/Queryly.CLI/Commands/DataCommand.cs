@@ -3,6 +3,7 @@ using Spectre.Console;
 using Queryly.Core.Connections;
 using Queryly.Core.Query;
 using Azure;
+using Queryly.Providers.PostgreSql;
 
 namespace Queryly.CLI.Commands;
 
@@ -22,20 +23,17 @@ public static class DataCommand
                 return;
             }
 
-            // await AnsiConsole.Status()
-            //     .StartAsync("Loading data...", async ctx =>
-            //     {
-
-            //     });
             var provider = GetProvider(connection.DbType);
             using var dbConnection = await provider.OpenConnectionAsync(connection.ConnectionString);
-
             var executor = new QueryExecutor(dbConnection);
+
+            // Get total row count
             var count = await executor.ExecuteScalarAsync($"SELECT COUNT(*) FROM [{tableName}]");
             var totalRows = Convert.ToInt32(count);
             var pageSize = 50;
             var totalPages = (int)Math.Ceiling(totalRows / (double)pageSize);
-            PaginationInfo pageInfo = new PaginationInfo(1, pageSize)
+
+            var pageInfo = new PaginationInfo(1, pageSize)
             {
                 TotalRows = totalRows,
                 TotalPages = totalPages
@@ -43,17 +41,15 @@ public static class DataCommand
 
             while (true)
             {
-                AnsiConsole.MarkupLine($"[bold blue]Browsing Table:[/] {tableName} ([grey]{totalRows} rows, {totalPages} pages[/])\n");
+                AnsiConsole.Clear();
+                AnsiConsole.MarkupLine($"[bold blue]Browsing Table:[/] {tableName} ([grey]{totalRows:N0} rows, {totalPages} pages[/])\n");
 
-                var sql = $"SELECT * FROM [{tableName}] LIMIT {pageSize} OFFSET {(pageInfo.PageNumber - 1) * pageSize}";
-                var result = await WithLoadingAsync(
-    "Loading page data...",
-    () => executor.ExecuteQueryAsync(sql)
-);
+                var sql = $"SELECT * FROM \"{tableName}\" LIMIT {pageSize} OFFSET {pageInfo.GetOffset()}";
+                var result = await WithLoadingAsync("Loading page data...", () => executor.ExecuteQueryAsync(sql));
 
                 if (!result.IsSuccess)
                 {
-                    AnsiConsole.MarkupLine($"[red]✗ Query failed: {result.ErrorMessage}[/]");
+                    AnsiConsole.MarkupLine($"[red]✗ Query failed: {Markup.Escape(result.ErrorMessage!)}[/]");
                     return;
                 }
 
@@ -62,24 +58,57 @@ public static class DataCommand
 
                 var command = AnsiConsole.Ask<string>("[blue]Command>[/]").Trim().ToLower();
 
-                if (command == "n") { PaginationInfo.NextPage(pageInfo); }
-                else if (command == "p") { PaginationInfo.PreviousPage(pageInfo); }
+                if (command == "n")
+                {
+                    if (!pageInfo.HasNextPage)
+                    {
+                        AnsiConsole.MarkupLine("[yellow]! Already on last page.[/]");
+                        await Task.Delay(1000);
+                        continue;
+                    }
+                    pageInfo.NextPage();
+                }
+                else if (command == "p")
+                {
+                    if (!pageInfo.HasPreviousPage)
+                    {
+                        AnsiConsole.MarkupLine("[yellow]! Already on first page.[/]");
+                        await Task.Delay(1000);
+                        continue;
+                    }
+                    pageInfo.PreviousPage();
+                }
                 else if (command == "g" || command == "go")
                 {
-                    int pageNumber = AnsiConsole.Ask<int>("Enter page number:");
-                    if (pageNumber >= 1 && pageNumber <= totalPages)
-                        pageInfo.GoToPage(pageNumber);
-                    else
-                        AnsiConsole.MarkupLine("[red]Invalid page number.[/]");
+                    var pageNumber = AnsiConsole.Ask<int>($"Enter page number (1-{totalPages}):");
+
+                    if (pageNumber < 1 || pageNumber > totalPages)
+                    {
+                        AnsiConsole.MarkupLine($"[red]✗ Invalid page number.[/]");
+                        await Task.Delay(1500);
+                        continue;
+                    }
+
+                    pageInfo.GoToPage(pageNumber);
+                }
+                else if (command == "h" || command == "help")
+                {
+                    ShowHelp();
+                    AnsiConsole.Ask<string>("\n[grey]Press Enter to continue...[/]");
                     continue;
                 }
-                else if (command == "q") break;
-                else
+                else if (command == "q")
                 {
-                    AnsiConsole.MarkupLine("[red]✗ Unknown command.[/]");
                     break;
                 }
+                else
+                {
+                    AnsiConsole.MarkupLine("[red]✗ Unknown command. Type 'h' for help.[/]");
+                    await Task.Delay(1500);
+                }
             }
+
+            AnsiConsole.MarkupLine("[grey]Exited browse mode.[/]");
         }
         catch (Exception ex)
         {
@@ -329,12 +358,30 @@ public static class DataCommand
         return result;
     }
 
+    private static void ShowHelp()
+    {
+        var table = new Table();
+        table.Border = TableBorder.Rounded;
+        table.Title = new TableTitle("[bold]Navigation Commands[/]");
+
+        table.AddColumn("Command");
+        table.AddColumn("Description");
+
+        table.AddRow("[blue]n[/]", "Go to next page");
+        table.AddRow("[blue]p[/]", "Go to previous page");
+        table.AddRow("[blue]g[/] or [blue]go[/]", "Go to specific page number");
+        table.AddRow("[blue]h[/] or [blue]help[/]", "Show this help");
+        table.AddRow("[blue]q[/]", "Quit and return to terminal");
+
+        AnsiConsole.Write(table);
+    }
 
     private static IConnectionProvider GetProvider(DatabaseType type)
     {
         return type switch
         {
             DatabaseType.SQLite => new SqliteConnectionProvider(),
+            DatabaseType.PostgreSQL => new PostgreSQLConnectionProvider(),
             _ => throw new NotSupportedException($"Database type {type} is not supported yet.")
         };
     }

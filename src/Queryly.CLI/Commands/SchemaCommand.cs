@@ -1,4 +1,5 @@
 using Queryly.Core.Connections;
+using Queryly.Providers.PostgreSql;
 using Spectre.Console;
 
 public class SchemaCommand
@@ -170,6 +171,7 @@ public class SchemaCommand
         return type switch
         {
             DatabaseType.SQLite => new SqliteConnectionProvider(),
+            DatabaseType.PostgreSQL => new PostgreSQLConnectionProvider(),
             _ => throw new NotSupportedException($"Database type {type} is not supported yet.")
         };
     }

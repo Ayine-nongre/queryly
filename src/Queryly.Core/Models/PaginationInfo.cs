@@ -1,39 +1,39 @@
 public class PaginationInfo
 {
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public int TotalPages { get; set; }
+    public int PageNumber { get; private set; }
+    public int PageSize { get; }
     public int TotalRows { get; set; }
-    public bool HasPreviousPage => PageNumber > 1;
+    public int TotalPages { get; set; }
+    
     public bool HasNextPage => PageNumber < TotalPages;
-
+    public bool HasPreviousPage => PageNumber > 1;
+    
     public PaginationInfo(int pageNumber, int pageSize)
     {
         PageNumber = pageNumber;
         PageSize = pageSize;
     }
-
-    public static void NextPage(PaginationInfo pageInfo)
+    
+    public void NextPage()
     {
-        if (pageInfo.HasNextPage)
-        {
-            pageInfo.PageNumber++;
-        }
+        if (HasNextPage)
+            PageNumber++;
     }
-
-    public static void PreviousPage(PaginationInfo pageInfo)
+    
+    public void PreviousPage()
     {
-        if (pageInfo.HasPreviousPage)
-        {
-            pageInfo.PageNumber--;
-        }
+        if (HasPreviousPage)
+            PageNumber--;
     }
-
+    
     public void GoToPage(int pageNumber)
     {
         if (pageNumber >= 1 && pageNumber <= TotalPages)
-        {
             PageNumber = pageNumber;
-        }
+    }
+    
+    public int GetOffset()
+    {
+        return (PageNumber - 1) * PageSize;
     }
 }

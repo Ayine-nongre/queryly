@@ -1,5 +1,6 @@
 using Spectre.Console;
 using Queryly.Core.Connections;
+using Queryly.Providers.PostgreSql;
 
 public static class ConnectCommand
 {
@@ -52,7 +53,8 @@ public static class ConnectCommand
             var type = AnsiConsole.Prompt(
                 new SelectionPrompt<DatabaseType>()
                     .Title("Select [green]database type[/]:")
-                    .AddChoices(DatabaseType.SQLite));
+                    .AddChoices(DatabaseType.SQLite)
+                    .AddChoices(DatabaseType.PostgreSQL));
             
             var connString = AnsiConsole.Ask<string>("Connection [green]string[/]:");
             
@@ -60,7 +62,7 @@ public static class ConnectCommand
             {
                 Name = name,
                 DbType = type,
-                ConnectionString = "Data Source=" + connString
+                ConnectionString = connString
             };
             
             var testPassed = false;
@@ -68,7 +70,7 @@ public static class ConnectCommand
                 .StartAsync("Testing connection...", async ctx =>
                 {
                     var provider = GetProvider(type);
-                    testPassed = await provider.TestConnectionAsync("Data Source=" + connString);
+                    testPassed = await provider.TestConnectionAsync(connString);
                     
                     if (testPassed)
                     {
@@ -173,6 +175,7 @@ public static class ConnectCommand
         return type switch
         {
             DatabaseType.SQLite => new SqliteConnectionProvider(),
+            DatabaseType.PostgreSQL => new PostgreSQLConnectionProvider(),
             _ => throw new NotSupportedException($"Database type {type} is not supported yet.")
         };
     }

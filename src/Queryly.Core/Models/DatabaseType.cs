@@ -1,6 +1,9 @@
 public enum DatabaseType
 {
-    SQLite
+    SQLite,
+    SQLServer,
+    PostgreSQL,
+    MySQL
 }
 
 public static class DatabaseTypeExtensions
@@ -10,6 +13,9 @@ public static class DatabaseTypeExtensions
         return dbType switch
         {
             DatabaseType.SQLite => "SQLite",
+            DatabaseType.SQLServer => "SQLServer",
+            DatabaseType.MySQL => "MySQL",
+            DatabaseType.PostgreSQL => "PostgreSQL",
             _ => "Unknown"
         };
     }

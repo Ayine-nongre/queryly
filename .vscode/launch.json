@@ -7,7 +7,7 @@
       "request": "launch",
       "preLaunchTask": "build",
       "program": "${workspaceFolder}/src/Queryly.CLI/bin/Debug/net8.0/Queryly.CLI.dll",
-      "args": [],
+      "args": ["data", "browse", "postgres", "Tenants"],
       "cwd": "${workspaceFolder}/src/Queryly.CLI",
       "console": "integratedTerminal",
       "stopAtEntry": false
