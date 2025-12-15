@@ -44,7 +44,11 @@ public static class DataCommand
                 AnsiConsole.Clear();
                 AnsiConsole.MarkupLine($"[bold blue]Browsing Table:[/] {tableName} ([grey]{totalRows:N0} rows, {totalPages} pages[/])\n");
 
-                var sql = $"SELECT * FROM \"{tableName}\" LIMIT {pageSize} OFFSET {pageInfo.GetOffset()}";
+                var sql = "";
+                if (connection.DbType == DatabaseType.SQLServer)
+                    {sql = $"SELECT * FROM [{tableName}] ORDER BY (SELECT NULL) OFFSET {pageInfo.GetOffset()} ROWS FETCH NEXT {pageSize} ROWS ONLY";}
+                else {sql = $"SELECT * FROM \"{tableName}\" LIMIT {pageSize} OFFSET {pageInfo.GetOffset()}";}
+
                 var result = await WithLoadingAsync("Loading page data...", () => executor.ExecuteQueryAsync(sql));
 
                 if (!result.IsSuccess)
@@ -252,7 +256,7 @@ public static class DataCommand
             for (int j = 0; j < data.Columns.Count; j++)
             {
                 var value = row[j];
-                values[j] = value == DBNull.Value ? "[grey]NULL[/]" : value.ToString() ?? "";
+                values[j] = value == DBNull.Value ? "[grey]NULL[/]" : Markup.Escape(value.ToString()!) ?? "";
 
                 if (values[j].Length > 50)
                 {
@@ -382,6 +386,7 @@ public static class DataCommand
         {
             DatabaseType.SQLite => new SqliteConnectionProvider(),
             DatabaseType.PostgreSQL => new PostgreSQLConnectionProvider(),
+            DatabaseType.SQLServer => new SqlServerConnectionProvider(),
             _ => throw new NotSupportedException($"Database type {type} is not supported yet.")
         };
     }

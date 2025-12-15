@@ -172,6 +172,7 @@ public class SchemaCommand
         {
             DatabaseType.SQLite => new SqliteConnectionProvider(),
             DatabaseType.PostgreSQL => new PostgreSQLConnectionProvider(),
+            DatabaseType.SQLServer => new SqlServerConnectionProvider(),
             _ => throw new NotSupportedException($"Database type {type} is not supported yet.")
         };
     }

@@ -54,7 +54,8 @@ public static class ConnectCommand
                 new SelectionPrompt<DatabaseType>()
                     .Title("Select [green]database type[/]:")
                     .AddChoices(DatabaseType.SQLite)
-                    .AddChoices(DatabaseType.PostgreSQL));
+                    .AddChoices(DatabaseType.PostgreSQL)
+                    .AddChoices(DatabaseType.SQLServer));
             
             var connString = AnsiConsole.Ask<string>("Connection [green]string[/]:");
             
@@ -176,6 +177,7 @@ public static class ConnectCommand
         {
             DatabaseType.SQLite => new SqliteConnectionProvider(),
             DatabaseType.PostgreSQL => new PostgreSQLConnectionProvider(),
+            DatabaseType.SQLServer => new SqlServerConnectionProvider(),
             _ => throw new NotSupportedException($"Database type {type} is not supported yet.")
         };
     }
