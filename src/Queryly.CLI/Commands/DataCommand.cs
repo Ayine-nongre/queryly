@@ -27,8 +27,7 @@ public static class DataCommand
             using var dbConnection = await provider.OpenConnectionAsync(connection.ConnectionString);
             var executor = new QueryExecutor(dbConnection);
 
-            // Get total row count
-            var count = await executor.ExecuteScalarAsync($"SELECT COUNT(*) FROM [{tableName}]");
+            var count = connection.DbType != DatabaseType.SQLServer ? await executor.ExecuteScalarAsync($"SELECT COUNT(*) FROM `{tableName}`") : await executor.ExecuteScalarAsync($"SELECT COUNT(*) FROM [{tableName}]");
             var totalRows = Convert.ToInt32(count);
             var pageSize = 50;
             var totalPages = (int)Math.Ceiling(totalRows / (double)pageSize);
@@ -47,6 +46,8 @@ public static class DataCommand
                 var sql = "";
                 if (connection.DbType == DatabaseType.SQLServer)
                     {sql = $"SELECT * FROM [{tableName}] ORDER BY (SELECT NULL) OFFSET {pageInfo.GetOffset()} ROWS FETCH NEXT {pageSize} ROWS ONLY";}
+                else if (connection.DbType == DatabaseType.MySQL)
+                    {sql = $"SELECT * FROM `{tableName}` LIMIT {pageSize} OFFSET {pageInfo.GetOffset()}";}
                 else {sql = $"SELECT * FROM \"{tableName}\" LIMIT {pageSize} OFFSET {pageInfo.GetOffset()}";}
 
                 var result = await WithLoadingAsync("Loading page data...", () => executor.ExecuteQueryAsync(sql));
@@ -387,6 +388,7 @@ public static class DataCommand
             DatabaseType.SQLite => new SqliteConnectionProvider(),
             DatabaseType.PostgreSQL => new PostgreSQLConnectionProvider(),
             DatabaseType.SQLServer => new SqlServerConnectionProvider(),
+            DatabaseType.MySQL => new MySQLConnectionProvider(),
             _ => throw new NotSupportedException($"Database type {type} is not supported yet.")
         };
     }
