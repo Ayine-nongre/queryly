@@ -6,6 +6,7 @@ Queryly is a fast, developer-friendly CLI tool for managing local databases. Bui
 
 ## 🚀 Features
 
+- **Multiple Databases** - SQLite, PostgreSQL, MySQL, and SQL Server support
 - **Connection Management** - Save, test, and organize database connections
 - **Schema Exploration** - Browse tables, view column structures, and explore indexes
 - **Data Browsing** - View and navigate table data with a beautiful terminal UI
@@ -19,9 +20,9 @@ Queryly is a fast, developer-friendly CLI tool for managing local databases. Bui
 - .NET 8.0 SDK or later
 - Supported databases:
   - ✅ SQLite (fully supported)
-  - 🔄 SQL Server (coming soon)
-  - 🔄 PostgreSQL (coming soon)
-  - 🔄 MySQL (coming soon)
+  - ✅ SQL Server (fully supported)
+  - ✅ PostgreSQL (fully supported)
+  - ✅ MySQL (fully supported)
 
 ## 🛠️ Installation
 
@@ -246,7 +247,6 @@ Queryly stores its configuration in your home directory:
   "activeConnectionId": "abc123..."
 }
 ```
-
 ## 🔌 Database Providers
 
 ### SQLite
@@ -276,11 +276,95 @@ Data Source=mydb.db;Mode=ReadOnly
 - ✅ Query execution
 - ✅ Data export
 
-### SQL Server (Coming Soon)
+### PostgreSQL
 
-### PostgreSQL (Coming Soon)
+**Connection String Format:**
+```
+Host=localhost;Database=mydb;Username=postgres;Password=secret
+```
 
-### MySQL (Coming Soon)
+**Examples:**
+```bash
+# Local database
+Host=localhost;Database=myapp;Username=postgres;Password=mypass
+
+# With port
+Host=localhost;Port=5432;Database=myapp;Username=postgres;Password=mypass
+
+# With SSL
+Host=localhost;Database=myapp;Username=postgres;Password=mypass;SSL Mode=Require
+
+# Remote database
+Host=db.example.com;Database=production;Username=admin;Password=secure123
+```
+
+**Supported Features:**
+- ✅ Connection management
+- ✅ Schema exploration
+- ✅ Table browsing
+- ✅ Query execution
+- ✅ Data export
+
+### MySQL
+
+**Connection String Format:**
+```
+Server=localhost;Database=mydb;User=root;Password=secret
+```
+
+**Examples:**
+```bash
+# Local database
+Server=localhost;Database=myapp;User=root;Password=mypass
+
+# With port
+Server=localhost;Port=3306;Database=myapp;User=root;Password=mypass
+
+# Remote database
+Server=db.example.com;Database=production;User=admin;Password=secure123
+
+# With SSL
+Server=localhost;Database=myapp;User=root;Password=mypass;SslMode=Required
+```
+
+**Supported Features:**
+- ✅ Connection management
+- ✅ Schema exploration
+- ✅ Table browsing
+- ✅ Query execution
+- ✅ Data export
+
+### SQL Server
+
+**Connection String Format:**
+```
+Server=localhost;Database=mydb;User Id=sa;Password=secret;TrustServerCertificate=True
+```
+
+**Examples:**
+```bash
+# Local database
+Server=localhost;Database=myapp;User Id=sa;Password=YourPassword123;TrustServerCertificate=True
+
+# LocalDB
+Server=(localdb)\MSSQLLocalDB;Database=myapp;Integrated Security=true
+
+# With instance name
+Server=localhost\SQLEXPRESS;Database=myapp;User Id=sa;Password=pass;TrustServerCertificate=True
+
+# Remote database
+Server=db.example.com;Database=production;User Id=admin;Password=secure123;TrustServerCertificate=True
+
+# Windows Authentication
+Server=localhost;Database=myapp;Integrated Security=true
+```
+
+**Supported Features:**
+- ✅ Connection management
+- ✅ Schema exploration (with schema support)
+- ✅ Table browsing
+- ✅ Query execution
+- ✅ Data export
 
 ## 🎨 Technology Stack
 
@@ -444,9 +528,6 @@ Exited query mode.
 
 ### Upcoming Features
 - 🔄 Pagination and filtering
-- 🔄 SQL Server support
-- 🔄 PostgreSQL support
-- 🔄 MySQL support
 - 🔄 Data editing (INSERT, UPDATE, DELETE)
 - 🔄 Query history and saved queries
 - 🔄 Database comparison tools
