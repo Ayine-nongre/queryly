@@ -41,7 +41,7 @@ public class SqlServerConnectionProvider : IConnectionProvider
     public List<string> GetDatabasesAsync(DbConnection connection)
     {
         if (connection is not SqlConnection)
-            throw new ArgumentException("Connection must be a PostgreSQL connection.", nameof(connection));
+            throw new ArgumentException("Connection must be a SQL Server connection.", nameof(connection));
 
         var sqlConn = (SqlConnection)connection;
         var builder = new SqlConnectionStringBuilder(sqlConn.ConnectionString);
@@ -83,41 +83,67 @@ public class SqlServerConnectionProvider : IConnectionProvider
     }
 
     public async Task<List<ColumnInfo>> GetColumnsAsync(DbConnection connection, string database, string table)
+{
+    if (connection is not SqlConnection)
+        throw new ArgumentException("Connection must be a SQL Server connection.", nameof(connection));
+
+    if (string.IsNullOrWhiteSpace(table))
+        throw new ArgumentNullException(nameof(table), "Table name cannot be null.");
+
+    try
     {
-        if (connection is not SqlConnection)
-            throw new ArgumentException("Connection must be a SQLServer connection.", nameof(connection));
+        var columns = new List<ColumnInfo>();
+        var sqlConn = (SqlConnection)connection;
 
-        if (string.IsNullOrWhiteSpace(table))
-            throw new ArgumentNullException(nameof(table), "Table name cannot be null.");
+        var command = @"
+            SELECT 
+                c.COLUMN_NAME,
+                c.DATA_TYPE,
+                c.IS_NULLABLE,
+                c.COLUMN_DEFAULT,
+                CASE 
+                    WHEN pk.COLUMN_NAME IS NOT NULL THEN 1 
+                    ELSE 0 
+                END AS IS_PRIMARY_KEY
+            FROM INFORMATION_SCHEMA.COLUMNS c
+            LEFT JOIN (
+                SELECT ku.COLUMN_NAME
+                FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+                JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE ku
+                    ON tc.CONSTRAINT_NAME = ku.CONSTRAINT_NAME
+                WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
+                    AND ku.TABLE_NAME = @TableName
+            ) pk ON c.COLUMN_NAME = pk.COLUMN_NAME
+            WHERE c.TABLE_NAME = @TableName
+            ORDER BY c.ORDINAL_POSITION;";
 
-        try
+        using var cmd = new SqlCommand(command, sqlConn);
+        cmd.Parameters.AddWithValue("@TableName", table);
+        
+        using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
         {
-            var columns = new List<ColumnInfo>();
-            var sqlConn = (SqlConnection)connection;
-
-            var command = @"SELECT COLUMN_NAME, DATA_TYPE 
-                            FROM INFORMATION_SCHEMA.COLUMNS 
-                            WHERE TABLE_NAME = @TableName";
-
-            using (var cmd = new SqlCommand(command, sqlConn))
+            var columnName = reader.GetString(0);
+            var dataType = reader.GetString(1);
+            var isNullable = reader.GetString(2);
+            var columnDefault = reader.IsDBNull(3) ? null : reader.GetString(3);
+            var isPrimaryKey = reader.GetInt32(4) == 1;
+            
+            columns.Add(new ColumnInfo
             {
-                cmd.Parameters.AddWithValue("@DatabaseName", database);
-                cmd.Parameters.AddWithValue("@TableName", table);
-                using (var reader = await cmd.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        var columnName = reader.GetString(0);
-                        var dataType = reader.GetString(1);
-                        columns.Add(new ColumnInfo { Name = columnName, DataType = dataType });
-                    }
-                }
-            }
-            return columns;
+                Name = columnName,
+                DataType = dataType,
+                IsNullable = isNullable == "YES",
+                DefaultValue = columnDefault,
+                IsPrimaryKey = isPrimaryKey
+            });
         }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to retrieve columns for table '{table}': {ex.Message}", ex);
-        }
+
+        return columns;
     }
+    catch (SqlException ex)
+    {
+        throw new Exception($"Failed to retrieve columns for table '{table}': {ex.Message}", ex);
+    }
+}
 }
